@@ -1,0 +1,19 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.log-container {
+  display: flex;
+  align-items: start;
+  margin-top: 5px;
+}
+
+.log-timestamp {
+  min-width: 200px;
+  max-width: 200px;
+}
+
+.log-message {
+  margin-left: 10px;
+}

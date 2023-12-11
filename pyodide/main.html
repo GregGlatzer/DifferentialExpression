@@ -1,0 +1,59 @@
+<!doctype html>
+<html>    
+    <body>
+        <script>
+            const worker = new Worker('webworker.js'); // web worker file
+            worker.postMessage({'cmd': 'install', 'data': null}); // install python packages in worker
+
+            let packagesInstalled = false; // python code cannot run without packages installed
+            
+            // define python script
+            const script = `
+                # import all modules
+                import js
+                import pandas as pd
+                from deseqpyodide.dds import DeseqDataSet   #from pydeseq2.dds import DeseqDataSet
+                from deseqpyodide.ds import DeseqStats  #from pydeseq2.ds import DeseqStats
+
+                # set up counts table
+                counts = pd.read_csv('count_table.csv')
+                counts = counts[counts.sum(axis = 1) > 0].set_index('Geneid').transpose()
+
+                # divide into cohorts
+                metadata = pd.DataFrame(zip(counts.index, ['C','C','C','C', 'RS', 'RS', 'RS', 'RS']), columns = ['Sample', 'Condition'])
+                metadata = metadata.set_index('Sample')
+
+
+                # run dispersion and log fold-change (LFC) estimation.
+                dds = DeseqDataSet(counts=counts, metadata=metadata, design_factors="Condition")
+                dds.deseq2()
+
+                # summary of statistical tests
+                stat_res = DeseqStats(dds, n_cpus=8, contrast = ('Condition','RS','C'))
+                stat_res.summary()
+                res = stat_res.results_df
+
+                # analysis result
+                print(res)
+            `;
+            
+            // wait for package installation phase to complete
+            worker.addEventListener('message', function(msg) {
+                if (msg.data === 'Packages imported') {
+                    console.log('Process complete: ' + msg.data);
+                    packagesInstalled = true;
+                    
+                    // run python script instantly, as we already have cohorts
+                    runPython(script);
+                }
+            });
+
+            // function that runs python code given a script
+            async function runPython(scr) {
+                if (packagesInstalled === true) {
+                    worker.postMessage({'cmd': 'C:/Users/gglatzer/AppData/Local/Programs/Python/Python312.exe', 'data': scr});
+                }
+            }
+        </script>
+    </body>
+</html>
