@@ -21,7 +21,7 @@ export class PyodideService {
    * @description Initialize Pyodide in the worker. This will install the necessary Python packages to do Differential Expression.
    * @returns
    */
-  async init(loggingCallback: (msg: string) => void = () => {}) {
+  async init(loggingCallback: (msg: string | {cmd: string; data: string}) => void = () => {}) {
     // Initialize Pyodide in the worker
     this.worker.postMessage({ cmd: 'install', data: null });
 

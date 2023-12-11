@@ -5,6 +5,7 @@ import { PyodideService } from 'app/services/pyodide/pyodide.service';
 interface ILogEntry {
   timestamp: string;
   message: string;
+  type: string
 }
 
 @Component({
@@ -31,14 +32,22 @@ export class DiffExpWidgetComponent implements OnInit {
     this.pyodideService.runPythonCode(scriptContent);
   }
 
-  loggingCallback = (message: string) => {
+  loggingCallback = (message: string | {cmd: string; data: string}) => {
+
+    let type = 'log'
+    if (typeof message === 'object') {
+      type = message.cmd;
+      message = message.data;
+    }
+
     const now = new Date();
     const date = `${now.getMonth()}-${now.getDate()}-${now.getFullYear()}`;
     const time = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
     const timestamp = `${date} ${time}`;
     this.logs.push({
       timestamp,
-      message
+      message,
+      type
     });
   }
 }
