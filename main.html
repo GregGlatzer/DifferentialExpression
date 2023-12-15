@@ -16,18 +16,23 @@
                 from deseqpyodide.ds import DeseqStats  #from pydeseq2.ds import DeseqStats
 
                 # set up counts table
-                counts = pd.read_csv('count_table.csv')
+                print('Loading dataset')
+                counts = pd.read_csv('C:/Users/gglatzer/Downloads/1298_combatseq_log2tpm_sampleIDnew.csv', index_col=0)
+                print('Dataset loaded')
                 counts = counts[counts.sum(axis = 1) > 0].set_index('Geneid').transpose()
+
+                print('Preprocessing dataset')
 
                 # divide into cohorts
                 metadata = pd.DataFrame(zip(counts.index, ['C','C','C','C', 'RS', 'RS', 'RS', 'RS']), columns = ['Sample', 'Condition'])
                 metadata = metadata.set_index('Sample')
 
-
+                print('Running Deseq')
                 # run dispersion and log fold-change (LFC) estimation.
                 dds = DeseqDataSet(counts=counts, metadata=metadata, design_factors="Condition")
                 dds.deseq2()
 
+                print('Running stat summary')
                 # summary of statistical tests
                 stat_res = DeseqStats(dds, n_cpus=8, contrast = ('Condition','RS','C'))
                 stat_res.summary()
