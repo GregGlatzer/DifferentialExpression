@@ -2,6 +2,8 @@ import pandas as pd
 from time import time
 from pydeseq2.dds import DeseqDataSet
 from pydeseq2.ds import DeseqStats
+# from deseqpyodide.dds import DeseqDataSet  
+# from deseqpyodide.ds import DeseqStats  
 
 def preprocess_for_deseq2(counts_fp: str, cohort_A_fp: str, cohort_B_fp: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
@@ -70,7 +72,7 @@ def deseq(counts_matrix: pd.DataFrame, metadata: pd.DataFrame) -> pd.DataFrame:
 
     print('Running stat summary')
     # summary of statistical tests
-    stat_res = DeseqStats(dds, n_cpus=8, contrast = ('Condition','A','B'))
+    stat_res = DeseqStats(dds, contrast = ('Condition','A','B'))
     stat_res.summary()
     res = stat_res.results_df
 
